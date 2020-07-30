@@ -1,0 +1,1481 @@
+---
+API: 2.1
+OpenSesame: 3.2.8
+Platform: nt
+---
+set width 1280
+set uniform_coordinates no
+set title "Extended template"
+set synth_backend droid
+set subject_parity even
+set subject_nr 0
+set start experiment
+set sound_sample_size -16
+set sound_freq 48000
+set sound_channels 2
+set sound_buf_size 1024
+set sampler_backend legacy
+set round_decimals 2
+set mouse_backend droid
+set keyboard_backend droid
+set height 800
+set fullscreen no
+set form_clicks no
+set foreground black
+set font_underline no
+set font_size 18
+set font_italic no
+set font_family mono
+set font_bold no
+set experiment_path "C:/Users/user/Desktop/poly working/notes/git/OS/tone/combined_4lists.opensesame"
+set disable_garbage_collection yes
+set description "A template containing a practice and an experimental phase"
+set coordinates relative
+set compensation 0
+set canvas_backend droid
+set bidi no
+set background white
+
+define mouse_response __mouse_response
+	set timeout infinite
+	set show_cursor yes
+	set linked_sketchpad ""
+	set flush yes
+	set event_type mouseclick
+	set duration mouseclick
+	set description "Collects mouse responses"
+
+define reset_feedback __reset_feedback
+	set description "Resets the feedback variables, such as 'avg_rt' and 'acc'"
+
+define touch_response __touch_response
+	set timeout 3000
+	set show_cursor yes
+	set linked_sketchpad ""
+	set flush yes
+	set event_type mouseclick
+	set duration mouseclick
+	set description "A grid-based response item, convenient for touch screens"
+	set _nrow 1
+	set _ncol 3
+
+define loop _d_practice_loop
+	set source_file ""
+	set source table
+	set repeat 1
+	set order random
+	set item _d_practice_sequence
+	set description "Repeatedly runs another item"
+	set cycles 2
+	set continuous no
+	set column_order "tone_cue;correct_response;tone_pair"
+	set break_if_on_first yes
+	set break_if never
+	setcycle 0 tone_cue left
+	setcycle 0 correct_response 1
+	setcycle 0 tone_pair 14
+	setcycle 1 tone_cue right
+	setcycle 1 correct_response 3
+	setcycle 1 tone_pair 14
+	run _d_practice_sequence
+
+define sequence _d_practice_sequence
+	set flush_keyboard yes
+	set description "Runs a number of items in sequence"
+	run d_practice_trial always
+	run touch_response always
+	run logger always
+	run d_practice_response always
+
+define sequence _main_sequence
+	set flush_keyboard yes
+	set description "Runs a number of items in sequence"
+	run main_trial always
+	run __touch_response always
+	run logger always
+	run main_response always
+
+define mouse_response _mouse_response
+	set timeout infinite
+	set show_cursor yes
+	set linked_sketchpad ""
+	set flush yes
+	set event_type mouseclick
+	set duration mouseclick
+	set description "Collects mouse responses"
+
+define loop _p_practice_loop
+	set source_file ""
+	set source table
+	set repeat 1
+	set order random
+	set item _p_practice_sequence
+	set description "Repeatedly runs another item"
+	set cycles 2
+	set continuous no
+	set column_order "tone_pair;tone_order"
+	set break_if_on_first yes
+	set break_if never
+	setcycle 0 tone_pair 14
+	setcycle 0 tone_order 1
+	setcycle 1 tone_pair 14
+	setcycle 1 tone_order 2
+	run _p_practice_sequence
+
+define sequence _p_practice_sequence
+	set flush_keyboard yes
+	set description "Runs a number of items in sequence"
+	run p_practice_trial always
+	run _touch_response always
+	run logger always
+
+define reset_feedback _reset_feedback
+	set description "Resets the feedback variables, such as 'avg_rt' and 'acc'"
+
+define touch_response _touch_response
+	set timeout 1500
+	set show_cursor yes
+	set linked_sketchpad ""
+	set flush yes
+	set event_type mouseclick
+	set duration mouseclick
+	set description "A grid-based response item, convenient for touch screens"
+	set _nrow 1
+	set _ncol 2
+
+define sketchpad continue
+	set reset_variables no
+	set duration mouseclick
+	set description "Displays stimuli"
+
+define inline_script d_instruction
+	set description "Executes Python code"
+	___run__
+	prep_canvas.show()
+	self.sleep(800) #1500
+		
+	d_instruction_sampler.play()
+			
+	d_panda_canvas.show()
+	self.sleep(5000) #1000
+	d_left_canvas.show()
+	self.sleep(2500) #3500
+	d_right_canvas.show()
+	self.sleep(2500) #3500
+	d_mother_canvas.show()
+	self.sleep(11500) #3500
+	__end__
+	___prepare__
+	from openexp.canvas import canvas
+	prep_canvas = canvas(exp, bgcolor="white") 
+		
+	d_panda_canvas = canvas(exp) 
+	d_panda_path = exp.get_file('d_panda.png')
+	d_panda_canvas.image(d_panda_path) 
+		
+	d_left_canvas = canvas(exp) 
+	d_left_path = exp.get_file('d_left.png') 
+	d_left_canvas.image(d_left_path) 
+		
+	d_right_canvas = canvas(exp)
+	d_right_path = exp.get_file('d_right.png') 
+	d_right_canvas.image(d_right_path) 
+	
+	d_mother_canvas = canvas(exp)
+	d_mother_path = exp.get_file('d_mother.png')
+	d_mother_canvas.image(d_mother_path) 
+		
+	
+	from openexp.sampler import sampler
+		
+	d_instruction_sampler= sampler(exp, exp.get_file('d_instruction.wav'))
+	__end__
+
+define loop d_practice_loop
+	set source_file ""
+	set source table
+	set repeat 1
+	set order random
+	set item d_practice_sequence
+	set description "Repeatedly runs another item"
+	set cycles 1
+	set continuous no
+	set column_order practice
+	set break_if_on_first yes
+	set break_if never
+	setcycle 0 practice yes
+	run d_practice_sequence
+
+define inline_script d_practice_response
+	set description "Executes Python code"
+	___run__
+	tone_response = self.get("response")
+	print tone_response
+	
+	if tone_response == 1:
+		d_left_response_canvas.show()
+		
+	if tone_response == 3:
+		d_right_response_canvas.show()
+			
+	self.sleep(400) #1500
+	__end__
+	___prepare__
+	from openexp.canvas import canvas
+	prep_canvas = canvas(exp, bgcolor="white") 
+	
+		
+	d_left_response_canvas = canvas(exp) 
+	d_left_response_path = exp.get_file('d_left_response.png') 
+	d_left_response_canvas.image(d_left_response_path) 
+		
+	d_right_response_canvas = canvas(exp) 
+	d_right_response_path = exp.get_file('d_right_response.png') 
+	d_right_response_canvas.image(d_right_response_path) 
+	__end__
+
+define sequence d_practice_sequence
+	set flush_keyboard yes
+	set description "Runs a number of items in sequence"
+	run reset_feedback always
+	run _d_practice_loop always
+
+define inline_script d_practice_trial
+	set description "Executes Python code"
+	___run__
+	prep_canvas.show()
+	self.sleep(400) #1500
+	
+	d_all_canvas.show()
+	self.sleep(500) #1000
+	
+	d_left_canvas.show()
+	my_sampler1.play()
+	self.sleep(1200) #3500
+	
+	
+	d_right_canvas.show()
+	my_sampler2.play()
+	self.sleep(1200) #3500
+	
+	d_center_canvas.show()
+	if tone_cue == "left":
+		my_sampler1.play()
+	elif tone_cue == "right":
+		my_sampler2.play()
+	__end__
+	___prepare__
+	from openexp.canvas import canvas
+	prep_canvas = canvas(exp, bgcolor="white") 
+		
+	d_all_canvas = canvas(exp) 
+	d_all_path = exp.get_file('d_all.png')
+	d_all_canvas.image(d_all_path) 
+		
+	d_left_canvas = canvas(exp) 
+	d_left_path = exp.get_file('d_left.png') 
+	d_left_canvas.image(d_left_path) 
+		
+	d_right_canvas = canvas(exp)
+	d_right_path = exp.get_file('d_right.png') 
+	d_right_canvas.image(d_right_path) 
+	
+	d_center_canvas = canvas(exp)
+	d_center_path = exp.get_file('d_center.png')
+	d_center_canvas.image(d_center_path) 
+		
+	
+	from openexp.sampler import sampler
+	
+	tone_pair = str(self.get('tone_pair'))
+	tone_cue = self.get('tone_cue')
+	
+		
+	tone1=tone_pair[0]
+	tone2=tone_pair[1]
+		
+	wav1="min"+tone1+".wav"
+	wav2="min"+tone2+".wav"
+		
+	src1 = exp.get_file(wav1)
+	src2 = exp.get_file(wav2)
+	my_sampler1= sampler(exp, src1)
+	my_sampler2= sampler(exp, src2)
+	__end__
+
+define inline_script determine_blockorder
+	set description "Executes Python code"
+	set _run ""
+	___prepare__
+	if self.get('subject_nr')%2 == 1:
+		list=1
+	else:
+		list=2	
+	exp.set('list',list)
+	__end__
+
+define inline_script end
+	set description "Executes Python code"
+	set _run ""
+	set _prepare ""
+
+define sequence experiment
+	set flush_keyboard yes
+	set description "The main sequence of the experiment"
+	run determine_blockorder always
+	run d_practice_loop always
+	run continue always
+	run main_loop always
+	run sketchpad always
+
+define logger logger
+	set description "Logs experimental data"
+	set auto_log yes
+
+define loop main_1
+	set source_file ""
+	set source table
+	set skip 0
+	set repeat 1
+	set order sequential
+	set item _main_sequence
+	set description "Repeatedly runs another item"
+	set cycles 32
+	set continuous no
+	set column_order "tone_cv;tone_pair;tone_order;tone_cue;correct_response"
+	set break_if_on_first yes
+	set break_if never
+	setcycle 0 tone_cue left
+	setcycle 0 correct_response 1
+	setcycle 0 tone_pair 14
+	setcycle 0 tone_cv wai
+	setcycle 0 tone_order 1
+	setcycle 1 tone_cue right
+	setcycle 1 correct_response 3
+	setcycle 1 tone_pair 14
+	setcycle 1 tone_cv sau
+	setcycle 1 tone_order 1
+	setcycle 2 tone_cue left
+	setcycle 2 correct_response 1
+	setcycle 2 tone_pair 14
+	setcycle 2 tone_cv tou
+	setcycle 2 tone_order 1
+	setcycle 3 tone_cue left
+	setcycle 3 correct_response 1
+	setcycle 3 tone_pair 25
+	setcycle 3 tone_cv tou
+	setcycle 3 tone_order 1
+	setcycle 4 tone_cue right
+	setcycle 4 correct_response 3
+	setcycle 4 tone_pair 25
+	setcycle 4 tone_cv sau
+	setcycle 4 tone_order 2
+	setcycle 5 tone_cue left
+	setcycle 5 correct_response 1
+	setcycle 5 tone_pair 25
+	setcycle 5 tone_cv wai
+	setcycle 5 tone_order 2
+	setcycle 6 tone_cue left
+	setcycle 6 correct_response 1
+	setcycle 6 tone_pair 25
+	setcycle 6 tone_cv wai
+	setcycle 6 tone_order 1
+	setcycle 7 tone_cue right
+	setcycle 7 correct_response 3
+	setcycle 7 tone_pair 14
+	setcycle 7 tone_cv tou
+	setcycle 7 tone_order 2
+	setcycle 8 tone_cue left
+	setcycle 8 correct_response 1
+	setcycle 8 tone_pair 25
+	setcycle 8 tone_cv sau
+	setcycle 8 tone_order 2
+	setcycle 9 tone_cue right
+	setcycle 9 correct_response 3
+	setcycle 9 tone_pair 14
+	setcycle 9 tone_cv sau
+	setcycle 9 tone_order 2
+	setcycle 10 tone_cue left
+	setcycle 10 correct_response 1
+	setcycle 10 tone_pair 14
+	setcycle 10 tone_cv lam
+	setcycle 10 tone_order 1
+	setcycle 11 tone_cue left
+	setcycle 11 correct_response 1
+	setcycle 11 tone_pair 25
+	setcycle 11 tone_cv lam
+	setcycle 11 tone_order 2
+	setcycle 12 tone_cue right
+	setcycle 12 correct_response 3
+	setcycle 12 tone_pair 14
+	setcycle 12 tone_cv tou
+	setcycle 12 tone_order 1
+	setcycle 13 tone_cue right
+	setcycle 13 correct_response 3
+	setcycle 13 tone_pair 14
+	setcycle 13 tone_cv lam
+	setcycle 13 tone_order 2
+	setcycle 14 tone_cue left
+	setcycle 14 correct_response 1
+	setcycle 14 tone_pair 25
+	setcycle 14 tone_cv tou
+	setcycle 14 tone_order 2
+	setcycle 15 tone_cue left
+	setcycle 15 correct_response 1
+	setcycle 15 tone_pair 14
+	setcycle 15 tone_cv wai
+	setcycle 15 tone_order 2
+	setcycle 16 tone_cue left
+	setcycle 16 correct_response 1
+	setcycle 16 tone_pair 25
+	setcycle 16 tone_cv sau
+	setcycle 16 tone_order 1
+	setcycle 17 tone_cue right
+	setcycle 17 correct_response 3
+	setcycle 17 tone_pair 25
+	setcycle 17 tone_cv wai
+	setcycle 17 tone_order 1
+	setcycle 18 tone_cue right
+	setcycle 18 correct_response 3
+	setcycle 18 tone_pair 25
+	setcycle 18 tone_cv lam
+	setcycle 18 tone_order 1
+	setcycle 19 tone_cue right
+	setcycle 19 correct_response 3
+	setcycle 19 tone_pair 25
+	setcycle 19 tone_cv lam
+	setcycle 19 tone_order 2
+	setcycle 20 tone_cue right
+	setcycle 20 correct_response 3
+	setcycle 20 tone_pair 25
+	setcycle 20 tone_cv sau
+	setcycle 20 tone_order 1
+	setcycle 21 tone_cue left
+	setcycle 21 correct_response 1
+	setcycle 21 tone_pair 14
+	setcycle 21 tone_cv lam
+	setcycle 21 tone_order 2
+	setcycle 22 tone_cue left
+	setcycle 22 correct_response 1
+	setcycle 22 tone_pair 14
+	setcycle 22 tone_cv sau
+	setcycle 22 tone_order 2
+	setcycle 23 tone_cue left
+	setcycle 23 correct_response 1
+	setcycle 23 tone_pair 25
+	setcycle 23 tone_cv lam
+	setcycle 23 tone_order 1
+	setcycle 24 tone_cue right
+	setcycle 24 correct_response 3
+	setcycle 24 tone_pair 25
+	setcycle 24 tone_cv tou
+	setcycle 24 tone_order 2
+	setcycle 25 tone_cue left
+	setcycle 25 correct_response 1
+	setcycle 25 tone_pair 14
+	setcycle 25 tone_cv tou
+	setcycle 25 tone_order 2
+	setcycle 26 tone_cue right
+	setcycle 26 correct_response 3
+	setcycle 26 tone_pair 14
+	setcycle 26 tone_cv lam
+	setcycle 26 tone_order 1
+	setcycle 27 tone_cue left
+	setcycle 27 correct_response 1
+	setcycle 27 tone_pair 14
+	setcycle 27 tone_cv sau
+	setcycle 27 tone_order 1
+	setcycle 28 tone_cue right
+	setcycle 28 correct_response 3
+	setcycle 28 tone_pair 25
+	setcycle 28 tone_cv lam
+	setcycle 28 tone_order 1
+	setcycle 29 tone_cue right
+	setcycle 29 correct_response 3
+	setcycle 29 tone_pair 25
+	setcycle 29 tone_cv wai
+	setcycle 29 tone_order 2
+	setcycle 30 tone_cue right
+	setcycle 30 correct_response 3
+	setcycle 30 tone_pair 14
+	setcycle 30 tone_cv wai
+	setcycle 30 tone_order 1
+	setcycle 31 tone_cue right
+	setcycle 31 correct_response 3
+	setcycle 31 tone_pair 14
+	setcycle 31 tone_cv wai
+	setcycle 31 tone_order 2
+	run _main_sequence
+
+define loop main_2
+	set source_file ""
+	set source table
+	set skip 0
+	set repeat 1
+	set order sequential
+	set item _main_sequence
+	set description "Repeatedly runs another item"
+	set cycles 32
+	set continuous no
+	set column_order "tone_cv;tone_pair;tone_order;tone_cue;correct_response"
+	set break_if_on_first yes
+	set break_if never
+	setcycle 0 tone_cue left
+	setcycle 0 correct_response 1
+	setcycle 0 tone_pair 14
+	setcycle 0 tone_cv wai
+	setcycle 0 tone_order 1
+	setcycle 1 tone_cue left
+	setcycle 1 correct_response 1
+	setcycle 1 tone_pair 14
+	setcycle 1 tone_cv tou
+	setcycle 1 tone_order 1
+	setcycle 2 tone_cue right
+	setcycle 2 correct_response 3
+	setcycle 2 tone_pair 25
+	setcycle 2 tone_cv lam
+	setcycle 2 tone_order 2
+	setcycle 3 tone_cue left
+	setcycle 3 correct_response 1
+	setcycle 3 tone_pair 25
+	setcycle 3 tone_cv wai
+	setcycle 3 tone_order 1
+	setcycle 4 tone_cue left
+	setcycle 4 correct_response 1
+	setcycle 4 tone_pair 25
+	setcycle 4 tone_cv sau
+	setcycle 4 tone_order 2
+	setcycle 5 tone_cue left
+	setcycle 5 correct_response 1
+	setcycle 5 tone_pair 25
+	setcycle 5 tone_cv tou
+	setcycle 5 tone_order 1
+	setcycle 6 tone_cue left
+	setcycle 6 correct_response 1
+	setcycle 6 tone_pair 25
+	setcycle 6 tone_cv lam
+	setcycle 6 tone_order 2
+	setcycle 7 tone_cue left
+	setcycle 7 correct_response 1
+	setcycle 7 tone_pair 25
+	setcycle 7 tone_cv tou
+	setcycle 7 tone_order 2
+	setcycle 8 tone_cue right
+	setcycle 8 correct_response 1
+	setcycle 8 tone_pair 14
+	setcycle 8 tone_cv sau
+	setcycle 8 tone_order 2
+	setcycle 9 tone_cue right
+	setcycle 9 correct_response 3
+	setcycle 9 tone_pair 14
+	setcycle 9 tone_cv tou
+	setcycle 9 tone_order 2
+	setcycle 10 tone_cue right
+	setcycle 10 correct_response 3
+	setcycle 10 tone_pair 14
+	setcycle 10 tone_cv sau
+	setcycle 10 tone_order 1
+	setcycle 11 tone_cue right
+	setcycle 11 correct_response 3
+	setcycle 11 tone_pair 14
+	setcycle 11 tone_cv tou
+	setcycle 11 tone_order 1
+	setcycle 12 tone_cue left
+	setcycle 12 correct_response 1
+	setcycle 12 tone_pair 14
+	setcycle 12 tone_cv wai
+	setcycle 12 tone_order 2
+	setcycle 13 tone_cue left
+	setcycle 13 correct_response 1
+	setcycle 13 tone_pair 14
+	setcycle 13 tone_cv lam
+	setcycle 13 tone_order 1
+	setcycle 14 tone_cue right
+	setcycle 14 correct_response 3
+	setcycle 14 tone_pair 14
+	setcycle 14 tone_cv wai
+	setcycle 14 tone_order 2
+	setcycle 15 tone_cue right
+	setcycle 15 correct_response 3
+	setcycle 15 tone_pair 25
+	setcycle 15 tone_cv lam
+	setcycle 15 tone_order 1
+	setcycle 16 tone_cue right
+	setcycle 16 correct_response 3
+	setcycle 16 tone_pair 25
+	setcycle 16 tone_cv tou
+	setcycle 16 tone_order 1
+	setcycle 17 tone_cue left
+	setcycle 17 correct_response 1
+	setcycle 17 tone_pair 14
+	setcycle 17 tone_cv sau
+	setcycle 17 tone_order 1
+	setcycle 18 tone_cue right
+	setcycle 18 correct_response 3
+	setcycle 18 tone_pair 14
+	setcycle 18 tone_cv wai
+	setcycle 18 tone_order 1
+	setcycle 19 tone_cue left
+	setcycle 19 correct_response 1
+	setcycle 19 tone_pair 14
+	setcycle 19 tone_cv lam
+	setcycle 19 tone_order 2
+	setcycle 20 tone_cue left
+	setcycle 20 correct_response 1
+	setcycle 20 tone_pair 14
+	setcycle 20 tone_cv sau
+	setcycle 20 tone_order 2
+	setcycle 21 tone_cue right
+	setcycle 21 correct_response 3
+	setcycle 21 tone_pair 14
+	setcycle 21 tone_cv lam
+	setcycle 21 tone_order 2
+	setcycle 22 tone_cue right
+	setcycle 22 correct_response 3
+	setcycle 22 tone_pair 25
+	setcycle 22 tone_cv sau
+	setcycle 22 tone_order 1
+	setcycle 23 tone_cue right
+	setcycle 23 correct_response 3
+	setcycle 23 tone_pair 25
+	setcycle 23 tone_cv sau
+	setcycle 23 tone_order 2
+	setcycle 24 tone_cue left
+	setcycle 24 correct_response 1
+	setcycle 24 tone_pair 25
+	setcycle 24 tone_cv wai
+	setcycle 24 tone_order 2
+	setcycle 25 tone_cue left
+	setcycle 25 correct_response 1
+	setcycle 25 tone_pair 25
+	setcycle 25 tone_cv sau
+	setcycle 25 tone_order 1
+	setcycle 26 tone_cue right
+	setcycle 26 correct_response 3
+	setcycle 26 tone_pair 14
+	setcycle 26 tone_cv lam
+	setcycle 26 tone_order 1
+	setcycle 27 tone_cue left
+	setcycle 27 correct_response 1
+	setcycle 27 tone_pair 14
+	setcycle 27 tone_cv tou
+	setcycle 27 tone_order 2
+	setcycle 28 tone_cue right
+	setcycle 28 correct_response 3
+	setcycle 28 tone_pair 25
+	setcycle 28 tone_cv wai
+	setcycle 28 tone_order 1
+	setcycle 29 tone_cue left
+	setcycle 29 correct_response 1
+	setcycle 29 tone_pair 25
+	setcycle 29 tone_cv lam
+	setcycle 29 tone_order 1
+	setcycle 30 tone_cue right
+	setcycle 30 correct_response 3
+	setcycle 30 tone_pair 25
+	setcycle 30 tone_cv wai
+	setcycle 30 tone_order 2
+	setcycle 31 tone_cue right
+	setcycle 31 correct_response 3
+	setcycle 31 tone_pair 25
+	setcycle 31 tone_cv tou
+	setcycle 31 tone_order 2
+	run _main_sequence
+
+define loop main_3
+	set source_file ""
+	set source table
+	set skip 0
+	set repeat 1
+	set order sequential
+	set item _main_sequence
+	set description "Repeatedly runs another item"
+	set cycles 48
+	set continuous no
+	set column_order "tone_cv;tone_pair;tone_order;tone_cue;correct_response"
+	set break_if_on_first yes
+	set break_if never
+	setcycle 0 tone_cue left
+	setcycle 0 correct_response 1
+	setcycle 0 tone_pair 25
+	setcycle 0 tone_cv wai
+	setcycle 0 tone_order 1
+	setcycle 1 tone_cue left
+	setcycle 1 correct_response 1
+	setcycle 1 tone_pair 25
+	setcycle 1 tone_cv tou
+	setcycle 1 tone_order 1
+	setcycle 2 tone_cue left
+	setcycle 2 correct_response 1
+	setcycle 2 tone_pair 25
+	setcycle 2 tone_cv wai
+	setcycle 2 tone_order 2
+	setcycle 3 tone_cue pdtn
+	setcycle 3 correct_response 2
+	setcycle 3 tone_pair 25
+	setcycle 3 tone_cv tou
+	setcycle 3 tone_order 1
+	setcycle 4 tone_cue right
+	setcycle 4 correct_response 3
+	setcycle 4 tone_pair 14
+	setcycle 4 tone_cv lam
+	setcycle 4 tone_order 2
+	setcycle 5 tone_cue left
+	setcycle 5 correct_response 1
+	setcycle 5 tone_pair 14
+	setcycle 5 tone_cv wai
+	setcycle 5 tone_order 2
+	setcycle 6 tone_cue pdtn
+	setcycle 6 correct_response 2
+	setcycle 6 tone_pair 25
+	setcycle 6 tone_cv tou
+	setcycle 6 tone_order 2
+	setcycle 7 tone_cue pdtn
+	setcycle 7 correct_response 2
+	setcycle 7 tone_pair 25
+	setcycle 7 tone_cv wai
+	setcycle 7 tone_order 1
+	setcycle 8 tone_cue left
+	setcycle 8 correct_response 1
+	setcycle 8 tone_pair 25
+	setcycle 8 tone_cv sau
+	setcycle 8 tone_order 2
+	setcycle 9 tone_cue right
+	setcycle 9 correct_response 3
+	setcycle 9 tone_pair 14
+	setcycle 9 tone_cv tou
+	setcycle 9 tone_order 2
+	setcycle 10 tone_cue left
+	setcycle 10 correct_response 1
+	setcycle 10 tone_pair 14
+	setcycle 10 tone_cv lam
+	setcycle 10 tone_order 2
+	setcycle 11 tone_cue pdtn
+	setcycle 11 correct_response 2
+	setcycle 11 tone_pair 14
+	setcycle 11 tone_cv tou
+	setcycle 11 tone_order 2
+	setcycle 12 tone_cue left
+	setcycle 12 correct_response 1
+	setcycle 12 tone_pair 14
+	setcycle 12 tone_cv lam
+	setcycle 12 tone_order 1
+	setcycle 13 tone_cue right
+	setcycle 13 correct_response 3
+	setcycle 13 tone_pair 14
+	setcycle 13 tone_cv tou
+	setcycle 13 tone_order 1
+	setcycle 14 tone_cue left
+	setcycle 14 correct_response 1
+	setcycle 14 tone_pair 14
+	setcycle 14 tone_cv wai
+	setcycle 14 tone_order 1
+	setcycle 15 tone_cue pdtn
+	setcycle 15 correct_response 2
+	setcycle 15 tone_pair 14
+	setcycle 15 tone_cv tou
+	setcycle 15 tone_order 1
+	setcycle 16 tone_cue right
+	setcycle 16 correct_response 3
+	setcycle 16 tone_pair 14
+	setcycle 16 tone_cv sau
+	setcycle 16 tone_order 1
+	setcycle 17 tone_cue left
+	setcycle 17 correct_response 1
+	setcycle 17 tone_pair 25
+	setcycle 17 tone_cv tou
+	setcycle 17 tone_order 2
+	setcycle 18 tone_cue right
+	setcycle 18 correct_response 3
+	setcycle 18 tone_pair 25
+	setcycle 18 tone_cv sau
+	setcycle 18 tone_order 1
+	setcycle 19 tone_cue pdtn
+	setcycle 19 correct_response 2
+	setcycle 19 tone_pair 14
+	setcycle 19 tone_cv wai
+	setcycle 19 tone_order 2
+	setcycle 20 tone_cue left
+	setcycle 20 correct_response 1
+	setcycle 20 tone_pair 14
+	setcycle 20 tone_cv sau
+	setcycle 20 tone_order 2
+	setcycle 21 tone_cue right
+	setcycle 21 correct_response 3
+	setcycle 21 tone_pair 14
+	setcycle 21 tone_cv wai
+	setcycle 21 tone_order 2
+	setcycle 22 tone_cue left
+	setcycle 22 correct_response 1
+	setcycle 22 tone_pair 25
+	setcycle 22 tone_cv lam
+	setcycle 22 tone_order 2
+	setcycle 23 tone_cue pdtn
+	setcycle 23 correct_response 2
+	setcycle 23 tone_pair 14
+	setcycle 23 tone_cv wai
+	setcycle 23 tone_order 1
+	setcycle 24 tone_cue right
+	setcycle 24 correct_response 3
+	setcycle 24 tone_pair 25
+	setcycle 24 tone_cv lam
+	setcycle 24 tone_order 1
+	setcycle 25 tone_cue right
+	setcycle 25 correct_response 3
+	setcycle 25 tone_pair 25
+	setcycle 25 tone_cv wai
+	setcycle 25 tone_order 1
+	setcycle 26 tone_cue left
+	setcycle 26 correct_response 1
+	setcycle 26 tone_pair 25
+	setcycle 26 tone_cv sau
+	setcycle 26 tone_order 1
+	setcycle 27 tone_cue pdtn
+	setcycle 27 correct_response 2
+	setcycle 27 tone_pair 25
+	setcycle 27 tone_cv wai
+	setcycle 27 tone_order 1
+	setcycle 28 tone_cue left
+	setcycle 28 correct_response 1
+	setcycle 28 tone_pair 14
+	setcycle 28 tone_cv tou
+	setcycle 28 tone_order 2
+	setcycle 29 tone_cue right
+	setcycle 29 correct_response 3
+	setcycle 29 tone_pair 14
+	setcycle 29 tone_cv lam
+	setcycle 29 tone_order 1
+	setcycle 30 tone_cue right
+	setcycle 30 correct_response 3
+	setcycle 30 tone_pair 14
+	setcycle 30 tone_cv sau
+	setcycle 30 tone_order 2
+	setcycle 31 tone_cue pdtn
+	setcycle 31 correct_response 2
+	setcycle 31 tone_pair 14
+	setcycle 31 tone_cv tou
+	setcycle 31 tone_order 1
+	setcycle 32 tone_cue right
+	setcycle 32 correct_response 3
+	setcycle 32 tone_pair 25
+	setcycle 32 tone_cv sau
+	setcycle 32 tone_order 2
+	setcycle 33 tone_cue right
+	setcycle 33 correct_response 3
+	setcycle 33 tone_pair 25
+	setcycle 33 tone_cv tou
+	setcycle 33 tone_order 1
+	setcycle 34 tone_cue pdtn
+	setcycle 34 correct_response 2
+	setcycle 34 tone_pair 14
+	setcycle 34 tone_cv wai
+	setcycle 34 tone_order 1
+	setcycle 35 tone_cue right
+	setcycle 35 correct_response 3
+	setcycle 35 tone_pair 25
+	setcycle 35 tone_cv tou
+	setcycle 35 tone_order 2
+	setcycle 36 tone_cue pdtn
+	setcycle 36 correct_response 2
+	setcycle 36 tone_pair 14
+	setcycle 36 tone_cv wai
+	setcycle 36 tone_order 2
+	setcycle 37 tone_cue right
+	setcycle 37 correct_response 3
+	setcycle 37 tone_pair 25
+	setcycle 37 tone_cv lam
+	setcycle 37 tone_order 2
+	setcycle 38 tone_cue pdtn
+	setcycle 38 correct_response 2
+	setcycle 38 tone_pair 25
+	setcycle 38 tone_cv tou
+	setcycle 38 tone_order 1
+	setcycle 39 tone_cue pdtn
+	setcycle 39 correct_response 2
+	setcycle 39 tone_pair 25
+	setcycle 39 tone_cv wai
+	setcycle 39 tone_order 2
+	setcycle 40 tone_cue left
+	setcycle 40 correct_response 1
+	setcycle 40 tone_pair 14
+	setcycle 40 tone_cv tou
+	setcycle 40 tone_order 1
+	setcycle 41 tone_cue left
+	setcycle 41 correct_response 1
+	setcycle 41 tone_pair 25
+	setcycle 41 tone_cv lam
+	setcycle 41 tone_order 1
+	setcycle 42 tone_cue pdtn
+	setcycle 42 correct_response 2
+	setcycle 42 tone_pair 25
+	setcycle 42 tone_cv wai
+	setcycle 42 tone_order 2
+	setcycle 43 tone_cue pdtn
+	setcycle 43 correct_response 2
+	setcycle 43 tone_pair 14
+	setcycle 43 tone_cv tou
+	setcycle 43 tone_order 2
+	setcycle 44 tone_cue left
+	setcycle 44 correct_response 1
+	setcycle 44 tone_pair 14
+	setcycle 44 tone_cv sau
+	setcycle 44 tone_order 1
+	setcycle 45 tone_cue right
+	setcycle 45 correct_response 3
+	setcycle 45 tone_pair 25
+	setcycle 45 tone_cv wai
+	setcycle 45 tone_order 2
+	setcycle 46 tone_cue pdtn
+	setcycle 46 correct_response 2
+	setcycle 46 tone_pair 25
+	setcycle 46 tone_cv tou
+	setcycle 46 tone_order 2
+	setcycle 47 tone_cue right
+	setcycle 47 correct_response 3
+	setcycle 47 tone_pair 14
+	setcycle 47 tone_cv wai
+	setcycle 47 tone_order 1
+	run _main_sequence
+
+define loop main_4
+	set source_file ""
+	set source table
+	set skip 0
+	set repeat 1
+	set order sequential
+	set item _main_sequence
+	set description "Repeatedly runs another item"
+	set cycles 48
+	set continuous no
+	set column_order "tone_cv;tone_pair;tone_order;tone_cue;correct_response"
+	set break_if_on_first yes
+	set break_if never
+	setcycle 0 tone_cue left
+	setcycle 0 correct_response 1
+	setcycle 0 tone_pair 25
+	setcycle 0 tone_cv wai
+	setcycle 0 tone_order 2
+	setcycle 1 tone_cue right
+	setcycle 1 correct_response 3
+	setcycle 1 tone_pair 25
+	setcycle 1 tone_cv lam
+	setcycle 1 tone_order 2
+	setcycle 2 tone_cue pdtn
+	setcycle 2 correct_response 2
+	setcycle 2 tone_pair 14
+	setcycle 2 tone_cv tou
+	setcycle 2 tone_order 2
+	setcycle 3 tone_cue right
+	setcycle 3 correct_response 3
+	setcycle 3 tone_pair 25
+	setcycle 3 tone_cv sau
+	setcycle 3 tone_order 2
+	setcycle 4 tone_cue left
+	setcycle 4 correct_response 1
+	setcycle 4 tone_pair 25
+	setcycle 4 tone_cv wai
+	setcycle 4 tone_order 1
+	setcycle 5 tone_cue pdtn
+	setcycle 5 correct_response 2
+	setcycle 5 tone_pair 25
+	setcycle 5 tone_cv tou
+	setcycle 5 tone_order 2
+	setcycle 6 tone_cue right
+	setcycle 6 correct_response 3
+	setcycle 6 tone_pair 25
+	setcycle 6 tone_cv wai
+	setcycle 6 tone_order 1
+	setcycle 7 tone_cue left
+	setcycle 7 correct_response 1
+	setcycle 7 tone_pair 14
+	setcycle 7 tone_cv tou
+	setcycle 7 tone_order 1
+	setcycle 8 tone_cue pdtn
+	setcycle 8 correct_response 2
+	setcycle 8 tone_pair 25
+	setcycle 8 tone_cv wai
+	setcycle 8 tone_order 1
+	setcycle 9 tone_cue left
+	setcycle 9 correct_response 1
+	setcycle 9 tone_pair 14
+	setcycle 9 tone_cv lam
+	setcycle 9 tone_order 1
+	setcycle 10 tone_cue left
+	setcycle 10 correct_response 1
+	setcycle 10 tone_pair 14
+	setcycle 10 tone_cv wai
+	setcycle 10 tone_order 1
+	setcycle 11 tone_cue pdtn
+	setcycle 11 correct_response 2
+	setcycle 11 tone_pair 25
+	setcycle 11 tone_cv tou
+	setcycle 11 tone_order 1
+	setcycle 12 tone_cue left
+	setcycle 12 correct_response 1
+	setcycle 12 tone_pair 14
+	setcycle 12 tone_cv lam
+	setcycle 12 tone_order 2
+	setcycle 13 tone_cue left
+	setcycle 13 correct_response 1
+	setcycle 13 tone_pair 25
+	setcycle 13 tone_cv sau
+	setcycle 13 tone_order 1
+	setcycle 14 tone_cue pdtn
+	setcycle 14 correct_response 2
+	setcycle 14 tone_pair 25
+	setcycle 14 tone_cv wai
+	setcycle 14 tone_order 2
+	setcycle 15 tone_cue left
+	setcycle 15 correct_response 1
+	setcycle 15 tone_pair 25
+	setcycle 15 tone_cv tou
+	setcycle 15 tone_order 1
+	setcycle 16 tone_cue right
+	setcycle 16 correct_response 3
+	setcycle 16 tone_pair 14
+	setcycle 16 tone_cv sau
+	setcycle 16 tone_order 2
+	setcycle 17 tone_cue left
+	setcycle 17 correct_response 1
+	setcycle 17 tone_pair 25
+	setcycle 17 tone_cv tou
+	setcycle 17 tone_order 2
+	setcycle 18 tone_cue pdtn
+	setcycle 18 correct_response 2
+	setcycle 18 tone_pair 14
+	setcycle 18 tone_cv wai
+	setcycle 18 tone_order 1
+	setcycle 19 tone_cue left
+	setcycle 19 correct_response 1
+	setcycle 19 tone_pair 25
+	setcycle 19 tone_cv sau
+	setcycle 19 tone_order 2
+	setcycle 20 tone_cue left
+	setcycle 20 correct_response 1
+	setcycle 20 tone_pair 14
+	setcycle 20 tone_cv wai
+	setcycle 20 tone_order 2
+	setcycle 21 tone_cue right
+	setcycle 21 correct_response 3
+	setcycle 21 tone_pair 25
+	setcycle 21 tone_cv tou
+	setcycle 21 tone_order 1
+	setcycle 22 tone_cue pdtn
+	setcycle 22 correct_response 2
+	setcycle 22 tone_pair 25
+	setcycle 22 tone_cv wai
+	setcycle 22 tone_order 2
+	setcycle 23 tone_cue right
+	setcycle 23 correct_response 3
+	setcycle 23 tone_pair 25
+	setcycle 23 tone_cv tou
+	setcycle 23 tone_order 2
+	setcycle 24 tone_cue left
+	setcycle 24 correct_response 1
+	setcycle 24 tone_pair 14
+	setcycle 24 tone_cv sau
+	setcycle 24 tone_order 1
+	setcycle 25 tone_cue right
+	setcycle 25 correct_response 3
+	setcycle 25 tone_pair 14
+	setcycle 25 tone_cv tou
+	setcycle 25 tone_order 2
+	setcycle 26 tone_cue pdtn
+	setcycle 26 correct_response 2
+	setcycle 26 tone_pair 25
+	setcycle 26 tone_cv wai
+	setcycle 26 tone_order 1
+	setcycle 27 tone_cue right
+	setcycle 27 correct_response 3
+	setcycle 27 tone_pair 14
+	setcycle 27 tone_cv sau
+	setcycle 27 tone_order 1
+	setcycle 28 tone_cue pdtn
+	setcycle 28 correct_response 2
+	setcycle 28 tone_pair 14
+	setcycle 28 tone_cv tou
+	setcycle 28 tone_order 2
+	setcycle 29 tone_cue right
+	setcycle 29 correct_response 3
+	setcycle 29 tone_pair 25
+	setcycle 29 tone_cv wai
+	setcycle 29 tone_order 2
+	setcycle 30 tone_cue right
+	setcycle 30 correct_response 3
+	setcycle 30 tone_pair 14
+	setcycle 30 tone_cv tou
+	setcycle 30 tone_order 1
+	setcycle 31 tone_cue pdtn
+	setcycle 31 correct_response 2
+	setcycle 31 tone_pair 14
+	setcycle 31 tone_cv wai
+	setcycle 31 tone_order 2
+	setcycle 32 tone_cue pdtn
+	setcycle 32 correct_response 2
+	setcycle 32 tone_pair 25
+	setcycle 32 tone_cv tou
+	setcycle 32 tone_order 2
+	setcycle 33 tone_cue right
+	setcycle 33 correct_response 3
+	setcycle 33 tone_pair 25
+	setcycle 33 tone_cv sau
+	setcycle 33 tone_order 1
+	setcycle 34 tone_cue left
+	setcycle 34 correct_response 1
+	setcycle 34 tone_pair 14
+	setcycle 34 tone_cv tou
+	setcycle 34 tone_order 2
+	setcycle 35 tone_cue pdtn
+	setcycle 35 correct_response 2
+	setcycle 35 tone_pair 14
+	setcycle 35 tone_cv wai
+	setcycle 35 tone_order 2
+	setcycle 36 tone_cue left
+	setcycle 36 correct_response 1
+	setcycle 36 tone_pair 25
+	setcycle 36 tone_cv lam
+	setcycle 36 tone_order 2
+	setcycle 37 tone_cue left
+	setcycle 37 correct_response 1
+	setcycle 37 tone_pair 14
+	setcycle 37 tone_cv sau
+	setcycle 37 tone_order 2
+	setcycle 38 tone_cue pdtn
+	setcycle 38 correct_response 2
+	setcycle 38 tone_pair 14
+	setcycle 38 tone_cv tou
+	setcycle 38 tone_order 1
+	setcycle 39 tone_cue left
+	setcycle 39 correct_response 1
+	setcycle 39 tone_pair 25
+	setcycle 39 tone_cv lam
+	setcycle 39 tone_order 1
+	setcycle 40 tone_cue right
+	setcycle 40 correct_response 3
+	setcycle 40 tone_pair 14
+	setcycle 40 tone_cv wai
+	setcycle 40 tone_order 1
+	setcycle 41 tone_cue right
+	setcycle 41 correct_response 3
+	setcycle 41 tone_pair 14
+	setcycle 41 tone_cv lam
+	setcycle 41 tone_order 2
+	setcycle 42 tone_cue pdtn
+	setcycle 42 correct_response 2
+	setcycle 42 tone_pair 14
+	setcycle 42 tone_cv wai
+	setcycle 42 tone_order 1
+	setcycle 43 tone_cue pdtn
+	setcycle 43 correct_response 2
+	setcycle 43 tone_pair 25
+	setcycle 43 tone_cv tou
+	setcycle 43 tone_order 1
+	setcycle 44 tone_cue right
+	setcycle 44 correct_response 3
+	setcycle 44 tone_pair 14
+	setcycle 44 tone_cv wai
+	setcycle 44 tone_order 2
+	setcycle 45 tone_cue right
+	setcycle 45 correct_response 3
+	setcycle 45 tone_pair 25
+	setcycle 45 tone_cv lam
+	setcycle 45 tone_order 1
+	setcycle 46 tone_cue pdtn
+	setcycle 46 correct_response 2
+	setcycle 46 tone_pair 14
+	setcycle 46 tone_cv tou
+	setcycle 46 tone_order 1
+	setcycle 47 tone_cue right
+	setcycle 47 correct_response 3
+	setcycle 47 tone_pair 14
+	setcycle 47 tone_cv lam
+	setcycle 47 tone_order 1
+	run _main_sequence
+
+define inline_script main_instruction
+	set description "Executes Python code"
+	___run__
+	main_instruction_sampler.play()
+	prep_canvas.show()
+	self.sleep(2800)
+	__end__
+	___prepare__
+	from openexp.canvas import canvas
+	from openexp.sampler import sampler
+	prep_canvas = canvas(exp, bgcolor="white") 
+	main_instruction_sampler= sampler(exp, exp.get_file('main_instruction.wav'))
+	__end__
+
+define loop main_loop
+	set source_file ""
+	set source table
+	set repeat 1
+	set order random
+	set item main_sequence
+	set description "Repeatedly runs another item"
+	set cycles 1
+	set continuous no
+	set column_order practice
+	set break_if_on_first yes
+	set break_if never
+	setcycle 0 practice no
+	run main_sequence
+
+define inline_script main_response
+	set description "Executes Python code"
+	___run__
+	tone_response = self.get("response")
+	print tone_response
+	
+	if (tone_cue =="left") or (tone_cue =="right"):
+		if tone_response == 1:
+			d_left_response_canvas.show()
+		if tone_response == 3:
+			d_right_response_canvas.show()
+		self.sleep(400) 
+	__end__
+	___prepare__
+	from openexp.canvas import canvas
+	prep_canvas = canvas(exp, bgcolor="white") 
+	
+		
+	d_left_response_canvas = canvas(exp) 
+	d_left_response_path = exp.get_file('d_left_response.png') 
+	d_left_response_canvas.image(d_left_response_path) 
+		
+	d_right_response_canvas = canvas(exp) 
+	d_right_response_path = exp.get_file('d_right_response.png') 
+	d_right_response_canvas.image(d_right_response_path) 
+	__end__
+
+define sequence main_sequence
+	set flush_keyboard yes
+	set description "Runs a number of items in sequence"
+	run __reset_feedback always
+	run main_1 "[list] = 1"
+	run main_2 "[list] = 2"
+
+define inline_script main_trial
+	set description "Executes Python code"
+	___run__
+	prep_canvas.show()
+	self.sleep(400) 
+	
+	
+	d_all_canvas.show()
+	
+	self.sleep(400) 
+		
+	d_left_canvas.show()
+	if tone_order == "1":
+		my_sampler1.play()
+	else:
+		my_sampler2.play()
+	self.sleep(1200)
+	
+	d_right_canvas.show()
+	if tone_order == "1":
+		my_sampler2.play()
+	else:
+		my_sampler1.play()
+	self.sleep(1200) 
+	
+	d_center_canvas.show()
+	if tone_cue == "left":
+		if tone_order == "1":
+			my_sampler1.play()
+		elif tone_order == "2":
+			my_sampler2.play()		
+	elif tone_cue == "right":
+		if tone_order == "1":
+			my_sampler2.play()
+		elif tone_order == "2":
+			my_sampler1.play()
+				
+	self.sleep(500) 
+	__end__
+	___prepare__
+	from openexp.canvas import canvas
+	from openexp.sampler import sampler
+	prep_canvas = canvas(exp, bgcolor="white") 
+		
+	d_all_canvas = canvas(exp) 
+	d_all_path = exp.get_file('d_all.png')
+	d_all_canvas.image(d_all_path) 
+		
+	d_left_canvas = canvas(exp) 
+	d_left_path = exp.get_file('d_left.png') 
+	d_left_canvas.image(d_left_path) 
+		
+	d_right_canvas = canvas(exp)
+	d_right_path = exp.get_file('d_right.png') 
+	d_right_canvas.image(d_right_path) 
+	
+	d_center_canvas = canvas(exp)
+	d_center_path = exp.get_file('d_center.png')
+	d_center_canvas.image(d_center_path) 
+		
+	
+	tone_pair = str(self.get('tone_pair'))
+	tone_cue = self.get('tone_cue')
+	tone_order = str(self.get('tone_order'))
+	tone_cv = str(self.get('tone_cv'))
+		
+	tone1=tone_pair[0]
+	tone2=tone_pair[1]
+		
+	wav1=tone_cv+tone1+".wav"
+	wav2=tone_cv+tone2+".wav"
+		
+	src1 = exp.get_file(wav1)
+	src2 = exp.get_file(wav2)
+	my_sampler1= sampler(exp, src1)
+	my_sampler2= sampler(exp, src2)
+	__end__
+
+define mouse_response mouse_response
+	set timeout infinite
+	set show_cursor yes
+	set linked_sketchpad ""
+	set flush yes
+	set event_type mouseclick
+	set duration mouseclick
+	set description "Collects mouse responses"
+
+define inline_script p_instruction
+	set description "Executes Python code"
+	___run__
+	p_instruction_sampler.play()
+	prep_canvas.show()
+	self.sleep(4500)
+	
+	p_left_canvas.show()
+	self.sleep(2500)
+		
+	p_leftspeak_canvas.show()
+	self.sleep(2000)	
+		
+	p_mother_canvas.show()
+	self.sleep(2000)
+	
+	p_motherask_canvas.show()
+	self.sleep(6200)
+	__end__
+	___prepare__
+	from openexp.sampler import sampler
+	from openexp.canvas import canvas
+	prep_canvas = canvas(exp, bgcolor="white") 
+	
+	p_left_canvas = canvas(exp) 
+	p_left_path = exp.get_file('p_left.png')
+	p_left_canvas.image(p_left_path) 
+		
+	p_leftspeak_canvas = canvas(exp) 
+	p_leftspeak_path = exp.get_file('p_leftspeak.png') 
+	p_leftspeak_canvas.image(p_leftspeak_path) 
+		
+	p_mother_canvas = canvas(exp)
+	p_mother_path = exp.get_file('p_mother.png') 
+	p_mother_canvas.image(p_mother_path) 
+	
+	p_motherask_canvas = canvas(exp)
+	p_motherask_path = exp.get_file('p_motherask.png') 
+	p_motherask_canvas.image(p_motherask_path) 
+	
+	p_instruction_sampler= sampler(exp, exp.get_file('p_instruction.wav'))
+	__end__
+
+define loop p_practice_loop
+	set source_file ""
+	set source table
+	set repeat 1
+	set order random
+	set item p_practice_sequence
+	set description "Repeatedly runs another item"
+	set cycles 1
+	set continuous no
+	set column_order practice
+	set break_if_on_first yes
+	set break_if never
+	setcycle 0 practice yes
+	run p_practice_sequence
+
+define sequence p_practice_sequence
+	set flush_keyboard yes
+	set description "Runs a number of items in sequence"
+	run _reset_feedback always
+	run _p_practice_loop always
+
+define inline_script p_practice_trial
+	set description "Executes Python code"
+	___run__
+	prep_canvas.show()
+	self.sleep(400)
+	
+	p_left_canvas.show()
+	self.sleep(400)
+		
+	p_leftspeak_canvas.show()
+	
+	if tone_order == 1:
+		my_sampler1.play()
+	else:
+		my_sampler2.play()
+	self.sleep(800)	
+	
+	p_motherask_canvas.show()
+	self.sleep(1200)
+	__end__
+	___prepare__
+	from openexp.sampler import sampler
+	from openexp.canvas import canvas
+	prep_canvas = canvas(exp, bgcolor="white") 
+	
+	p_left_canvas = canvas(exp) 
+	p_left_path = exp.get_file('p_left.png')
+	p_left_canvas.image(p_left_path) 
+		
+	p_leftspeak_canvas = canvas(exp) 
+	p_leftspeak_path = exp.get_file('p_leftspeak.png') 
+	p_leftspeak_canvas.image(p_leftspeak_path) 
+		
+	p_motherask_canvas = canvas(exp)
+	p_motherask_path = exp.get_file('p_motherask.png') 
+	p_motherask_canvas.image(p_motherask_path) 
+	
+	tone_pair = str(self.get('tone_pair'))
+	tone_order = self.get('tone_order')
+	
+		
+	tone1=tone_pair[0]
+	tone2=tone_pair[1]
+		
+	wav1="min"+tone1+".wav"
+	wav2="min"+tone2+".wav"
+		
+	src1 = exp.get_file(wav1)
+	src2 = exp.get_file(wav2)
+	
+	my_sampler1= sampler(exp, src1)
+	my_sampler2= sampler(exp, src2)
+	__end__
+
+define reset_feedback reset_feedback
+	set description "Resets the feedback variables, such as 'avg_rt' and 'acc'"
+
+define sketchpad sketchpad
+	set reset_variables no
+	set duration keypress
+	set description "Displays stimuli"
+
+define touch_response touch_response
+	set timeout infinite
+	set show_cursor yes
+	set linked_sketchpad ""
+	set flush yes
+	set event_type mouseclick
+	set duration mouseclick
+	set description "A grid-based response item, convenient for touch screens"
+	set _nrow 1
+	set _ncol 3
+
